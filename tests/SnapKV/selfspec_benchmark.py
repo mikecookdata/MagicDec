@@ -11,6 +11,7 @@ from torch.utils.data.dataloader import DataLoader
 from tqdm import tqdm
 import argparse
 from MagicDec.Engine.SnapKV.backend import LMBackend
+from icecream import ic
 
 parser = argparse.ArgumentParser(description='Process model configuration and partitions.')
 parser.add_argument('--model', type=Path, default=Path("/scratch/models/meta-llama/Meta-Llama-3.1-8B/model.pth"), help='model')
@@ -34,6 +35,8 @@ parser.add_argument('--benchmark', action='store_true', help='Whether to compile
 
 args = parser.parse_args()
 assert args.prefix_len < args.max_len
+ic(f'prefix_len: {args.prefix_len}, window_size: {args.window_size}')
+ic(f'prefix-window_size: {args.prefix_len - args.window_size}')
 assert (args.prefix_len - args.window_size) % 128 == 0
 # assert args.max_len % 128 == 0
 assert (args.max_len + 127) // 128 == args.prefix_len // 128 + 1

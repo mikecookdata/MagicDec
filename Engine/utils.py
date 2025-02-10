@@ -206,6 +206,7 @@ def load_model_snapKV(checkpoint_path, device, precision, use_tp, rank_group=Non
 
     checkpoint = torch.load(str(checkpoint_path), mmap=True, weights_only=True)
     if "model" in checkpoint and "stories" in str(checkpoint_path):
+        print("Loading stories model...")
         checkpoint = checkpoint["model"]
     model.load_state_dict(checkpoint, assign=True)
 
@@ -214,6 +215,7 @@ def load_model_snapKV(checkpoint_path, device, precision, use_tp, rank_group=Non
         print("Applying tensor parallel to model ...")
         apply_tp(model, rank_group, group=group)
 
+    print("none of 3 ifs hit")
     model = model.to(device=device, dtype=precision)
     return model.eval()
 

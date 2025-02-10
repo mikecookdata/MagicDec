@@ -127,6 +127,7 @@ class LMBackend:
     # Only used for baseline inference
     @torch.inference_mode()
     def inference(self, input_ids: torch.LongTensor, benchmark = False):
+            # print("Inference called")
             dec_len = input_ids.shape[1]
             self.pre_decode(dec_len=dec_len)
 
@@ -141,6 +142,8 @@ class LMBackend:
                 # If benchmarking the latency, don't update the cachelens and page table
                 self.cachelens -= dec_len
                 self.paged_kv_last_page_len -= dec_len
+            # print('logits shape', logits.shape)
+            # print(f'logits {logits}')
             return logits
     
     def pre_decode(self, dec_len):
