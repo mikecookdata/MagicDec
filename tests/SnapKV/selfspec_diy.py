@@ -22,7 +22,7 @@ parser.add_argument('--draft_budget', type=int, default=257, help='Dataset end i
 parser.add_argument('--rank_group', nargs='+', type=int, default=[0],  help='Target group of ranks')
 parser.add_argument('--compile', action='store_true', default=False, help='Whether to compile the model.')
 
-parser.add_argument('--gamma', type=int, default=7, help='start')
+parser.add_argument('--gamma', type=int, default=3, help='start')
 
 parser.add_argument('--B', type=int, default=1, help='Batch size.')
 parser.add_argument('--prefix_len', type=int, default=16032, help='Prefix length')
@@ -109,14 +109,15 @@ if benchmark:
 for step, batch in tqdm(enumerate(dataloader), total=num_eval_steps):
     if step >= num_eval_steps:
         break
+    # Input id comes from dataloader
     input_ids = batch[0].to(DEVICE)
     print('input_ids: ', input_ids)
-    terminal = False
-    tokens_buffer= torch.zeros((BATCH_SIZE, args.gamma+1), device=DEVICE).long()
+    terminal = False # stop speculation when length exceeds MAX_LEN_TARGET
+    tokens_buffer= torch.zeros((BATCH_SIZE, args.gamma+1), device=DEVICE).long() # predefine a specific length array for last token in seq and draft tokens
     output = torch.zeros(BATCH_SIZE, MAX_LEN_TARGET+1, device=DEVICE).long()
-    output[:, :input_ids.shape[1]] = input_ids
+    output[:, :input_ids.shape[1]] = input_ids # copy input_ids to output
     num_nodes = torch.zeros(BATCH_SIZE,device=DEVICE).long()
-    num_nodes += input_ids.shape[1]
+    num_nodes += input_ids.shape[1] # not sure
 
     tokens_buffer[:, :1] = engine.encode(input_ids=input_ids)[:,-1:]
 
