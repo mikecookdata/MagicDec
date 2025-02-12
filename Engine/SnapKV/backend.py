@@ -201,6 +201,7 @@ class LMBackend:
     
     @torch.inference_mode()
     def speculate(self, input_ids: torch.LongTensor, benchmark = False):
+        # what's different from inference?
             dec_len = input_ids.shape[1]
             self.pre_spec(dec_len=dec_len)
             logits = self.draft_forward(

@@ -113,13 +113,13 @@ for step, batch in tqdm(enumerate(dataloader), total=num_eval_steps):
     input_ids = batch[0].to(DEVICE)
     print('input_ids: ', input_ids)
     terminal = False # stop speculation when length exceeds MAX_LEN_TARGET
-    tokens_buffer= torch.zeros((BATCH_SIZE, args.gamma+1), device=DEVICE).long() # predefine a specific length array for last token in seq and draft tokens
-    output = torch.zeros(BATCH_SIZE, MAX_LEN_TARGET+1, device=DEVICE).long()
+    tokens_buffer= torch.zeros((BATCH_SIZE, args.gamma+1), device=DEVICE).long() # predefine a specific length array for last token in seq and draft tokens 4x0s
+    output = torch.zeros(BATCH_SIZE, MAX_LEN_TARGET+1, device=DEVICE).long() # many 0s
     output[:, :input_ids.shape[1]] = input_ids # copy input_ids to output
     num_nodes = torch.zeros(BATCH_SIZE,device=DEVICE).long()
     num_nodes += input_ids.shape[1] # not sure
 
-    tokens_buffer[:, :1] = engine.encode(input_ids=input_ids)[:,-1:]
+    tokens_buffer[:, :1] = engine.encode(input_ids=input_ids)[:,-1:] #last position of seq
 
     torch.cuda.synchronize()
     start = time.perf_counter()
@@ -130,7 +130,7 @@ for step, batch in tqdm(enumerate(dataloader), total=num_eval_steps):
             torch.cuda.synchronize()
             t1 = time.time()
 
-        for i in range(args.gamma):
+        for i in range(args.gamma): # spec each token at a time
             tokens_buffer[:,i+1:i+2] = engine.speculate(tokens_buffer[:, i].view(-1,1))
         print(f'tokens_buffer: {tokens_buffer}')
 
